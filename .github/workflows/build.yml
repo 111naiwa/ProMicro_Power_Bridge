@@ -2,37 +2,46 @@ name: Build UF2 firmware
 on:
   push:
   workflow_dispatch:
-
 jobs:
   build:
-    runs-on: ubuntu‑latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
-          sudo apt‑get update
-          sudo apt‑get install ‑y git python3 python3‑pip cmake ninja‑build dtc wget unzip
+          sudo apt-get update
+          sudo apt-get install -y git python3 python3-pip cmake ninja-build dtc wget unzip
 
-      - name: Setup west & zephyr workspace
+      - name: Setup west & Zephyr workspace
         run: |
           python3 -m pip install west
-          west init‑local .
+          west init-local .
           west update
 
-      - name: Install Zephyr‑SDK
+      - name: Install ANT SDK (sdk-ant v2.1.1 for NCS v3.2.4)
         run: |
-          wget https://github.com/zephyrproject‑rtos/sdk‑ng/releases/download/v0.17.0/zephyr‑sdk‑0.17.0_linux‑x86_64.tar.xz
-          tar xf zephyr‑sdk‑0.17.0_linux‑x86_64.tar.xz
-          echo "ZEPHYR_SDK_INSTALL_DIR=${{ github.workspace }}/zephyr‑sdk‑0.17.0" >> $GITHUB_ENV
+          git clone --depth 1 --branch v2.1.1 https://github.com/ant-nrfconnect/sdk-ant.git ant
+
+      - name: Install Zephyr SDK
+        run: |
+          wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.0/zephyr-sdk-0.17.0_linux-x86_64.tar.xz
+          tar xf zephyr-sdk-0.17.0_linux-x86_64.tar.xz
+          echo "ZEPHYR_SDK_INSTALL_DIR=${{ github.workspace }}/zephyr-sdk-0.17.0" >> $GITHUB_ENV
 
       - name: Build firmware
         run: |
           west build --build-dir build_nano_xds . --pristine --board promicro_nrf52840/nrf52840/uf2
 
+      - name: Find UF2 path
+        run: |
+          find build_nano_xds -name "*.uf2" -ls
+
       - name: Upload UF2 artifact
-        uses: actions/upload‑artifact@v4
+        uses: actions/upload-artifact@v4
         with:
-          name: firmware‑uf2
-          path: build_nano_xds/zephyr/zephyr.uf2
+          name: firmware-uf2
+          path: |
+            build_nano_xds/zephyr/zephyr.uf2
+            build_nano_xds/ProMicro_Power_Bridge/zephyr/zephyr.uf2
