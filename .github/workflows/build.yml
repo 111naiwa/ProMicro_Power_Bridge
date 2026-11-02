@@ -29,6 +29,7 @@ jobs:
           wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.0/zephyr-sdk-0.17.0_linux-x86_64.tar.xz
           tar xf zephyr-sdk-0.17.0_linux-x86_64.tar.xz
           echo "ZEPHYR_SDK_INSTALL_DIR=${{ github.workspace }}/zephyr-sdk-0.17.0" >> $GITHUB_ENV
+          echo "WEST_TOPDIR=${{ github.workspace }}" >> $GITHUB_ENV
 
       - name: Build firmware
         run: |
