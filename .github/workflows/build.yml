@@ -17,7 +17,7 @@ jobs:
       - name: Setup west & Zephyr workspace
         run: |
           python3 -m pip install west
-          west init-local .
+          west init -l .
           west update
 
       - name: Install ANT SDK (sdk-ant v2.1.1 for NCS v3.2.4)
